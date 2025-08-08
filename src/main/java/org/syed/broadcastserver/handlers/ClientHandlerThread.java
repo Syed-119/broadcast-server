@@ -38,17 +38,25 @@ public class ClientHandlerThread implements Runnable {
     @Override
     public void run() {
 
-        ClientInfo clientInfo = new ClientInfo();
-        connectedClients.addClient();
-        System.out.println(thread.getName() + " Starting");
-
+        String username = null;
         try {
+            username = in.readLine();
+        } catch (IOException e) {
+            System.out.println("Error handling client: " + e.getMessage());
+        }
+        ClientInfo user = new ClientInfo(username, clientSocket, in, out);
+        try {
+
+            connectedClients.addClient(user);
+
             String inputLine;
-            while ((inputLine = in.readLine()) !=null) {
-                System.out.println("Recieved message from " + clientSocket.getInetAddress() + " " + thread.getName() + ": " + inputLine);
+            while ((inputLine = in.readLine()) != null) {
+                System.out.println("Recieved message from " + user.getUsername() + ": " + inputLine);
             }
         } catch (IOException e) {
             System.out.println("Error handling client: " + e.getMessage());
+        } finally {
+            connectedClients.removeClient(user);
         }
 
     }

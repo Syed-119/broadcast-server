@@ -19,4 +19,6 @@ public class ConnectedClients {
         System.out.println("Removing client for " + Thread.currentThread().getName());
         clients.remove(client);
     }
+
+
 }
