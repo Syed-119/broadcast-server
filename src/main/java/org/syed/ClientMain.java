@@ -19,16 +19,17 @@ public class ClientMain {
         try (
                 Socket socket = new Socket(serverAddress, serverPort);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+                BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+                BufferedReader serverInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         ){
                     System.out.print("Enter your name: ");
-                    String name = input.readLine();
+                    String name = in.readLine();
                     out.println(name);
 
                     Thread readerThread = new Thread(() -> {
                         String response;
                         try {
-                            while((response = input.readLine()) != null ){
+                            while((response = serverInput.readLine()) != null ){
                                 System.out.println(response);
                             }
                         } catch (IOException e){
@@ -37,7 +38,7 @@ public class ClientMain {
                     }); readerThread.start();
 
                     String userMsg;
-                    while ((userMsg = input.readLine()) != null){
+                    while ((userMsg = in.readLine()) != null){
                         out.println(userMsg);
                         if (userMsg.equalsIgnoreCase("exit")){
                             break;
