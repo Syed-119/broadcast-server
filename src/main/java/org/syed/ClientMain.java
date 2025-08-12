@@ -10,7 +10,14 @@ import java.net.Socket;
 
 public class ClientMain {
 
-
+    public static void main(String[] args) {
+        try {
+            // The actual logic or instance construction
+            new ClientMain(); // if your code is in the constructor
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public ClientMain() throws IOException {
         String serverAddress = "127.0.0.1";

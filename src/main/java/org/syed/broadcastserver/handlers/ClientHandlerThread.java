@@ -51,7 +51,10 @@ public class ClientHandlerThread implements Runnable {
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                System.out.println("Recieved message from " + user.getUsername() + ": " + inputLine);
+                if (inputLine.isBlank()) continue;
+                System.out.println("Received message from " + user.getUsername());
+                connectedClients.broadCast(inputLine, user);
+
             }
         } catch (IOException e) {
             System.out.println("Error handling client: " + e.getMessage());
