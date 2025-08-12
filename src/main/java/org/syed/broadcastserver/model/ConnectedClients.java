@@ -5,19 +5,40 @@ import java.util.List;
 
 public class ConnectedClients {
     private List<ClientInfo> clients;
+    private List<ClientChangeListener> listeners = new ArrayList<>();
 
     public ConnectedClients() {
         clients = new ArrayList<ClientInfo>();
     }
 
     synchronized public void addClient(ClientInfo client) {
-        System.out.println("Adding client for " + Thread.currentThread().getName() + " -> " + client.getUsername());
         clients.add(client);
+        notifyClientAdded(client);
     }
 
     synchronized public void removeClient(ClientInfo client) {
-        System.out.println("Removing client for " + Thread.currentThread().getName() + " -> " + (client != null ? client.getUsername() : "null"));
         clients.remove(client);
+        notifyClientRemoved(client);
+    }
+
+    public synchronized void addListener(ClientChangeListener listener){
+        listeners.add(listener);
+    }
+
+    public synchronized void removeListener(ClientChangeListener listener){
+        listeners.remove(listener);
+    }
+
+    private void notifyClientAdded(ClientInfo client){
+        for (ClientChangeListener listener : listeners) {
+            listener.onClientAdded(client);
+        }
+    }
+
+    private void notifyClientRemoved(ClientInfo client){
+        for (ClientChangeListener listener : listeners) {
+            listener.onClientRemoved(client);
+        }
     }
 
     public void broadCast(String message, ClientInfo sender) {

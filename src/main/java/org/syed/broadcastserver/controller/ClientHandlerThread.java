@@ -1,7 +1,8 @@
-package org.syed.broadcastserver.handlers;
+package org.syed.broadcastserver.controller;
 
 import org.syed.broadcastserver.model.ClientInfo;
 import org.syed.broadcastserver.model.ConnectedClients;
+import org.syed.broadcastserver.view.Helper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.net.Socket;
 public class ClientHandlerThread implements Runnable {
 
     private Thread thread;
-    ConnectedClients connectedClients;
+    ClientsController clientsController;
     private Socket clientSocket;
     private BufferedReader in;
     private PrintWriter out;
@@ -22,7 +23,7 @@ public class ClientHandlerThread implements Runnable {
 
     ClientHandlerThread(InetAddress address, ConnectedClients clients, Socket socket) throws IOException {
         this.thread = new Thread(this, address.toString());
-        this.connectedClients = clients;
+        this.clientsController = new ClientsController(clients);
         this.clientSocket = socket;
         this.out = new PrintWriter(clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -38,28 +39,28 @@ public class ClientHandlerThread implements Runnable {
     @Override
     public void run() {
 
-        String username = null;
+        String username;
         try {
             username = in.readLine();
         } catch (IOException e) {
-            System.out.println("Error handling client: " + e.getMessage());
+            return;
         }
         ClientInfo user = new ClientInfo(username, clientSocket, in, out);
         try {
 
-            connectedClients.addClient(user);
+            clientsController.addingClient(user);
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 if (inputLine.isBlank()) continue;
-                System.out.println("Received message from " + user.getUsername());
-                connectedClients.broadCast(inputLine, user);
+                Helper.printInfo("Received message from " + user.getUsername());
+                clientsController.broadcast(inputLine, user);
 
             }
         } catch (IOException e) {
-            System.out.println("Error handling client: " + e.getMessage());
+
         } finally {
-            connectedClients.removeClient(user);
+            clientsController.removeClient(user);
         }
 
     }
