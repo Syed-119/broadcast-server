@@ -2,7 +2,6 @@ package org.syed.broadcastserver.controller;
 
 import org.syed.broadcastserver.model.ClientInfo;
 import org.syed.broadcastserver.model.ConnectedClients;
-import org.syed.broadcastserver.view.Helper;
 
 public class ClientsController {
 
@@ -21,6 +20,10 @@ public class ClientsController {
     }
 
     public void broadcast(String message, ClientInfo sender) {
-        clients.broadCast(message, sender);
+        clients.broadcast(message, sender);
+    }
+
+    public void systemBroadcast(String message) {
+        clients.systemBroadcast(message);
     }
 }

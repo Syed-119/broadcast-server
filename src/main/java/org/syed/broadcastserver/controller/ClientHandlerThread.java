@@ -29,10 +29,9 @@ public class ClientHandlerThread implements Runnable {
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
 
-    public static ClientHandlerThread createAndStart(InetAddress address, ConnectedClients clients, Socket socket) throws IOException {
+    public static void createAndStart(InetAddress address, ConnectedClients clients, Socket socket) throws IOException {
         ClientHandlerThread clientHandlerThread = new ClientHandlerThread(address, clients, socket);
         clientHandlerThread.thread.start();
-        return clientHandlerThread;
 
     }
 
@@ -61,6 +60,7 @@ public class ClientHandlerThread implements Runnable {
 
         } finally {
             clientsController.removeClient(user);
+            clientsController.systemBroadcast(user.getUsername() + " has left the chat.");
         }
 
     }

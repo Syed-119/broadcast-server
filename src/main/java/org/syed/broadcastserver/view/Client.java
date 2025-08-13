@@ -19,7 +19,7 @@ public class Client {
                 BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
                 BufferedReader serverInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         ) {
-            Helper.promptUser("Enter you name");
+            Helper.promptUser("Enter you name: ");
             String name = in.readLine();
             out.println(name);
 

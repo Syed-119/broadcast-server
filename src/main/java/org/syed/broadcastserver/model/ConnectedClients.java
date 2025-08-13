@@ -41,7 +41,7 @@ public class ConnectedClients {
         }
     }
 
-    public void broadCast(String message, ClientInfo sender) {
+    public void broadcast(String message, ClientInfo sender) {
         String formatted = "From" + (sender != null ? sender.getUsername() : "Unknown") + ": " + message;
         List<ClientInfo> snapshot;
         synchronized (this) {
@@ -71,6 +71,19 @@ public class ConnectedClients {
                     clients.remove(client);
                 }
             }
+        }
+    }
+
+    public void systemBroadcast(String message){
+        List<ClientInfo> snapshot;
+        synchronized (this) {
+            snapshot = new ArrayList<>(clients);
+        }
+        for (ClientInfo client : snapshot) {
+            try {
+                client.getWriter().println("[SYSTEM] " + message);
+            }
+            catch (Exception e) {return;}
         }
     }
 }
