@@ -23,6 +23,8 @@ public class Client {
             String name = in.readLine();
             out.println(name);
 
+            Helper.printInfo("You can now start sending messages. Type 'exit' to leave the chat.");
+
             Thread readerThread = new Thread(() -> {
                 String response;
                 try {
@@ -37,15 +39,16 @@ public class Client {
 
             String userMsg;
             while ((userMsg = in.readLine()) != null) {
-                out.println(userMsg);
                 if (userMsg.equalsIgnoreCase("exit")) {
+                    out.println("[QUIT]");
                     break;
                 }
+                out.println(userMsg);
             }
 
             Helper.printInfo("Disconnecting...");
         } catch (IOException e) {
-            Helper.printError("Could not connect to server");
+            Helper.printError("Could not connect to server: " + e.getMessage());
         }
     }
 

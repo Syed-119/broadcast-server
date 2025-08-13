@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server implements ClientChangeListener {
+public class Server implements ClientChangeListener{
     private static ServerSocket serverSocket;
     private static final int PORT=5000;
     static ConnectedClients connectedClients = new ConnectedClients();
@@ -40,4 +40,11 @@ public class Server implements ClientChangeListener {
         Helper.printInfo("Removing client for " + Thread.currentThread().getName() +
                 " -> " + (client != null ? client.getUsername() : "null"));
     }
+
+    @Override
+    public void onClientMessageReceived(ClientInfo client) {
+        Helper.printInfo("Message received from: " + client.getUsername());
+    }
+
+
 }

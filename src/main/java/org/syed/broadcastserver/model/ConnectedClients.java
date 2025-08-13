@@ -8,26 +8,34 @@ public class ConnectedClients {
     private List<ClientChangeListener> listeners = new ArrayList<>();
 
     public ConnectedClients() {
-        clients = new ArrayList<ClientInfo>();
+        clients = new ArrayList<>();
     }
 
-    synchronized public void addClient(ClientInfo client) {
+    synchronized public boolean addClient(ClientInfo client) {
+        if (client == null || client.getUsername() == null) return false;
+        if (clients.stream().anyMatch(c -> c.getUsername().equalsIgnoreCase(client.getUsername()))) {
+            return false;
+        }
         clients.add(client);
         notifyClientAdded(client);
+        systemBroadcast(client.getUsername() + " has joined the chat.");
+        return true;
     }
 
     synchronized public void removeClient(ClientInfo client) {
         clients.remove(client);
         notifyClientRemoved(client);
+        systemBroadcast(client.getUsername() + " has left the chat.");
     }
 
     public synchronized void addListener(ClientChangeListener listener){
         listeners.add(listener);
     }
 
-    public synchronized void removeListener(ClientChangeListener listener){
-        listeners.remove(listener);
+    public synchronized void clientMessage(ClientInfo client){
+        notifyClientMessage(client);
     }
+
 
     private void notifyClientAdded(ClientInfo client){
         for (ClientChangeListener listener : listeners) {
@@ -41,8 +49,14 @@ public class ConnectedClients {
         }
     }
 
+    private void notifyClientMessage(ClientInfo client){
+        for (ClientChangeListener listener : listeners) {
+            listener.onClientMessageReceived(client);
+        }
+    }
+
     public void broadcast(String message, ClientInfo sender) {
-        String formatted = "From" + (sender != null ? sender.getUsername() : "Unknown") + ": " + message;
+        String formatted = "From " + (sender != null ? sender.getUsername() : "Unknown") + ": " + message;
         List<ClientInfo> snapshot;
         synchronized (this) {
             snapshot = new ArrayList<>(clients);

@@ -11,8 +11,8 @@ public class ClientsController {
         this.clients = clients;
     }
 
-    public void addingClient(ClientInfo client){
-        clients.addClient(client);
+    public boolean addingClient(ClientInfo client){
+        return clients.addClient(client);
     }
 
     public void removeClient(ClientInfo client){
@@ -25,5 +25,10 @@ public class ClientsController {
 
     public void systemBroadcast(String message) {
         clients.systemBroadcast(message);
+    }
+
+    public void clientMessage(ClientInfo client){
+        clients.clientMessage(client);
+
     }
 }

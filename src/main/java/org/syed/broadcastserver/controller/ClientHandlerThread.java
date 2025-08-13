@@ -47,20 +47,33 @@ public class ClientHandlerThread implements Runnable {
         ClientInfo user = new ClientInfo(username, clientSocket, in, out);
         try {
 
-            clientsController.addingClient(user);
+            boolean added = clientsController.addingClient(user);
+            if (!added){
+                clientsController.systemBroadcast("Connection refused: Username already taken or invalid.");
+
+                return;
+            }
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
+                if ("[QUIT]".equalsIgnoreCase(inputLine)) {
+                    break;
+                }
                 if (inputLine.isBlank()) continue;
-                Helper.printInfo("Received message from " + user.getUsername());
+                clientsController.clientMessage(user);
                 clientsController.broadcast(inputLine, user);
 
             }
         } catch (IOException e) {
-
+            e.printStackTrace();
         } finally {
             clientsController.removeClient(user);
-            clientsController.systemBroadcast(user.getUsername() + " has left the chat.");
+            try {
+                clientSocket.close();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
         }
 
     }
