@@ -1,7 +1,8 @@
-package org.syed.broadcastserver.handlers;
+package org.syed.broadcastserver.controller;
 
 import org.syed.broadcastserver.model.ClientInfo;
 import org.syed.broadcastserver.model.ConnectedClients;
+import org.syed.broadcastserver.view.Helper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.net.Socket;
 public class ClientHandlerThread implements Runnable {
 
     private Thread thread;
-    ConnectedClients connectedClients;
+    ClientsController clientsController;
     private Socket clientSocket;
     private BufferedReader in;
     private PrintWriter out;
@@ -22,41 +23,57 @@ public class ClientHandlerThread implements Runnable {
 
     ClientHandlerThread(InetAddress address, ConnectedClients clients, Socket socket) throws IOException {
         this.thread = new Thread(this, address.toString());
-        this.connectedClients = clients;
+        this.clientsController = new ClientsController(clients);
         this.clientSocket = socket;
         this.out = new PrintWriter(clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
 
-    public static ClientHandlerThread createAndStart(InetAddress address, ConnectedClients clients, Socket socket) throws IOException {
+    public static void createAndStart(InetAddress address, ConnectedClients clients, Socket socket) throws IOException {
         ClientHandlerThread clientHandlerThread = new ClientHandlerThread(address, clients, socket);
         clientHandlerThread.thread.start();
-        return clientHandlerThread;
 
     }
 
     @Override
     public void run() {
 
-        String username = null;
+        String username;
         try {
             username = in.readLine();
         } catch (IOException e) {
-            System.out.println("Error handling client: " + e.getMessage());
+            return;
         }
         ClientInfo user = new ClientInfo(username, clientSocket, in, out);
         try {
 
-            connectedClients.addClient(user);
+            boolean added = clientsController.addingClient(user);
+            if (!added){
+                clientsController.systemBroadcast("Connection refused: Username already taken or invalid.");
+
+                return;
+            }
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                System.out.println("Recieved message from " + user.getUsername() + ": " + inputLine);
+                if ("[QUIT]".equalsIgnoreCase(inputLine)) {
+                    break;
+                }
+                if (inputLine.isBlank()) continue;
+                clientsController.clientMessage(user);
+                clientsController.broadcast(inputLine, user);
+
             }
         } catch (IOException e) {
-            System.out.println("Error handling client: " + e.getMessage());
+            e.printStackTrace();
         } finally {
-            connectedClients.removeClient(user);
+            clientsController.removeClient(user);
+            try {
+                clientSocket.close();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
         }
 
     }
